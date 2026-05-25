@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="card">
-  <p class="eyebrow">Enrôlement</p>
-  <h1>Générer un certificat client</h1>
-  <p class="lead">Remplissez le formulaire depuis votre iPhone ou votre ordinateur. Le lien de téléchargement expire rapidement.</p>
+  <p class="eyebrow">{{ ui.enroll_eyebrow }}</p>
+  <h1>{{ ui.enroll_title }}</h1>
+  <p class="lead">{{ ui.enroll_lead }}</p>
   <div class="warning">
-    Le fichier <strong>.p12</strong> contient une clé privée. Ne le partagez pas. Le lien expire rapidement.
+    {{ ui.enroll_warning }}
   </div>
   {% if errors %}
   <div class="flash flash-error">
@@ -14,39 +14,37 @@
     {% endfor %}
   </div>
   {% endif %}
-  <form method="post" action="/enroll" class="stack form-grid">
+  <form method="post" action="{{ lang_url('/enroll', lang) }}" class="stack form-grid">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <input type="hidden" name="invite_token" value="{{ invite_token }}">
     <label>
-      <span>Username</span>
+      <span>{{ ui.enroll_username }}</span>
       <input type="text" name="username" value="{{ defaults.username }}" placeholder="fahd" required maxlength="64" pattern="[A-Za-z0-9_-]+">
     </label>
     <label>
-      <span>Device name</span>
+      <span>{{ ui.enroll_device_name }}</span>
       <input type="text" name="device_name" value="{{ defaults.device_name }}" placeholder="iphone15" required maxlength="64" pattern="[A-Za-z0-9_-]+">
     </label>
     <label>
-      <span>Device type</span>
+      <span>{{ ui.enroll_device_type }}</span>
       <select name="device_type" required>
-        {% for device in device_types %}
-        <option value="{{ device }}" {% if defaults.device_type == device %}selected{% endif %}>{{ device }}</option>
+        {% for device, label in device_types %}
+        <option value="{{ device }}" {% if defaults.device_type == device %}selected{% endif %}>{{ label }}</option>
         {% endfor %}
       </select>
     </label>
     <label>
-      <span>Durée du certificat</span>
+      <span>{{ ui.enroll_duration }}</span>
       <select name="certificate_duration_days" required>
         {% for d in duration_options %}
-        <option value="{{ d }}" {% if defaults.certificate_duration_days == d|string %}selected{% endif %}>{{ d }} jours</option>
+        <option value="{{ d }}" {% if defaults.certificate_duration_days == d|string %}selected{% endif %}>{{ duration_label(d, lang) }}</option>
         {% endfor %}
       </select>
     </label>
     <label>
-      <span>Mot de passe du .p12</span>
-      <input type="password" name="p12_password" autocomplete="new-password" minlength="12" required>
+      <span>{{ ui.enroll_p12_password }}</span>
+      <input type="password" name="p12_password" autocomplete="new-password" minlength="12" placeholder="{{ ui.enroll_p12_placeholder }}">
     </label>
-    <button class="button primary" type="submit">Générer le certificat</button>
+    <button class="button primary" type="submit">{{ ui.enroll_submit }}</button>
   </form>
 </section>
 {% endblock %}
-

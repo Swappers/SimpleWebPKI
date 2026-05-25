@@ -57,7 +57,7 @@ class PKIManager:
     def ensure_ca(self) -> None:
         if self.ca_cert_path.exists() and self.ca_key_path.exists():
             return
-        if not self.settings.dev_ca:
+        if not self.settings.generate_self_signed_ca:
             raise PKIError(
                 f"CA manquante: {self.ca_cert_path} / {self.ca_key_path}. "
                 "Refus de démarrer hors mode dev."
@@ -70,7 +70,7 @@ class PKIManager:
         if self.ca_cert_path.exists() and self.ca_key_path.exists():
             return
 
-        logger.warning("CERTPORTAL_DEV_CA activé: génération d'une CA de développement dans %s", dev_ca_dir)
+        logger.warning("GENERATE_SELF_SIGNED_CA activé: génération d'une CA de développement dans %s", dev_ca_dir)
         self._run(
             [
                 "openssl",
@@ -165,9 +165,6 @@ class PKIManager:
                 encoding="utf-8",
             )
 
-            p12_password_file.write_text(p12_password, encoding="utf-8")
-            os.chmod(p12_password_file, 0o600)
-
             self._run(
                 [
                     "openssl",
@@ -195,23 +192,27 @@ class PKIManager:
             shutil.copy2(self.ca_cert_path, ca_crt)
             client_pem.write_text(client_crt.read_text(encoding="utf-8") + ca_crt.read_text(encoding="utf-8"), encoding="utf-8")
 
-            self._run(
-                [
-                    "openssl",
-                    "pkcs12",
-                    "-export",
-                    "-inkey",
-                    str(client_key),
-                    "-in",
-                    str(client_crt),
-                    "-certfile",
-                    str(ca_crt),
-                    "-out",
-                    str(client_p12),
-                    "-passout",
-                    f"file:{p12_password_file}",
-                ]
-            )
+            pkcs12_cmd = [
+                "openssl",
+                "pkcs12",
+                "-export",
+                "-inkey",
+                str(client_key),
+                "-in",
+                str(client_crt),
+                "-certfile",
+                str(ca_crt),
+                "-out",
+                str(client_p12),
+            ]
+            if p12_password:
+                p12_password_file.write_text(p12_password, encoding="utf-8")
+                os.chmod(p12_password_file, 0o600)
+                pkcs12_cmd.extend(["-passout", f"file:{p12_password_file}"])
+            else:
+                pkcs12_cmd.extend(["-passout", "pass:"])
+
+            self._run(pkcs12_cmd)
             os.chmod(client_p12, 0o600)
             p12_password_file.unlink(missing_ok=True)
 

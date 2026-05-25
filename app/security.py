@@ -16,6 +16,32 @@ from fastapi import HTTPException, Request, status
 NAME_RE = re.compile(r"^[A-Za-z0-9_-]+$")
 DEVICE_TYPES = {"iphone", "android", "macos", "windows", "linux", "other"}
 
+MESSAGES = {
+    "fr": {
+        "csrf": "CSRF invalide",
+        "identifier": "{field} invalide. Lettres, chiffres, tirets et underscores uniquement.",
+        "device_type": "Type d'appareil invalide",
+        "duration": "Durée non autorisée",
+        "duration_limit": "Durée supérieure à la limite autorisée",
+        "password": "Le mot de passe du .p12 doit contenir au moins 12 caractères, ou être laissé vide",
+        "admin_forbidden": "Accès refusé",
+    },
+    "en": {
+        "csrf": "Invalid CSRF token",
+        "identifier": "Invalid {field}. Letters, digits, hyphens and underscores only.",
+        "device_type": "Invalid device type",
+        "duration": "Duration not allowed",
+        "duration_limit": "Duration exceeds the allowed limit",
+        "password": "The .p12 password must be at least 12 characters, or left blank",
+        "admin_forbidden": "Access denied",
+    },
+}
+
+
+def _msg(lang: str, key: str, **kwargs: object) -> str:
+    template = MESSAGES.get(lang, MESSAGES["fr"]).get(key, key)
+    return template.format(**kwargs)
+
 
 def ensure_csrf_token(request: Request) -> str:
     token = request.session.get("csrf_token")
@@ -25,57 +51,60 @@ def ensure_csrf_token(request: Request) -> str:
     return token
 
 
-def validate_csrf(request: Request, token: str | None) -> None:
+def validate_csrf(request: Request, token: str | None, lang: str = "fr") -> None:
     expected = request.session.get("csrf_token")
     if not expected or not token or not hmac.compare_digest(expected, token):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="CSRF invalide")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=_msg(lang, "csrf"))
 
 
 def is_admin(request: Request) -> bool:
     return bool(request.session.get("is_admin"))
 
 
-def require_admin(request: Request) -> None:
+def require_admin(request: Request, lang: str = "fr") -> None:
     if not is_admin(request):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès refusé")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=_msg(lang, "admin_forbidden"))
 
 
-def validate_identifier(value: str, field_name: str) -> str:
+def validate_identifier(value: str, field_name: str, lang: str = "fr") -> str:
     cleaned = value.strip()
     if not cleaned or len(cleaned) > 64 or not NAME_RE.fullmatch(cleaned):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"{field_name} invalide. Lettres, chiffres, tirets et underscores uniquement.",
+            detail=_msg(lang, "identifier", field=field_name),
         )
     return cleaned
 
 
-def validate_device_type(value: str) -> str:
+def validate_device_type(value: str, lang: str = "fr") -> str:
     cleaned = value.strip().lower()
     if cleaned not in DEVICE_TYPES:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Type d'appareil invalide")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=_msg(lang, "device_type"))
     return cleaned
 
 
-def validate_duration(days: str, max_days: int) -> int:
+def validate_duration(days: str, max_days: int, lang: str = "fr") -> int:
     try:
         parsed = int(days)
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Durée invalide") from exc
-    if parsed not in {90, 180, 365}:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Durée non autorisée")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=_msg(lang, "duration")) from exc
+    if parsed not in {90, 180, 365, 365 * 5, 365 * 10}:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=_msg(lang, "duration"))
     if parsed > max_days:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Durée supérieure à la limite autorisée")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=_msg(lang, "duration_limit"))
     return parsed
 
 
-def validate_p12_password(password: str) -> str:
-    if len(password) < 12:
+def validate_p12_password(password: str, lang: str = "fr") -> str:
+    cleaned = password.strip()
+    if not cleaned:
+        return ""
+    if len(cleaned) < 12:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Le mot de passe du .p12 doit contenir au moins 12 caractères",
+            detail=_msg(lang, "password"),
         )
-    return password
+    return cleaned
 
 
 def common_name(username: str, device_name: str) -> str:
@@ -120,4 +149,3 @@ class SimpleRateLimiter:
                 return RateLimitResult(allowed=False, retry_after_seconds=retry_after)
             hits.append(now)
             return RateLimitResult(allowed=True)
-

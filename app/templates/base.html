@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr">
+<html lang="{{ lang }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,18 +9,19 @@
 <body>
   <div class="page-shell">
     <header class="topbar">
-      <a class="brand" href="/">SimpleWebPKI</a>
+      <a class="brand" href="{{ lang_url('/', lang) }}">SimpleWebPKI</a>
       <nav class="topnav">
-        <a href="/enroll">Enrôlement</a>
-        <a href="/admin">Admin</a>
+        <a href="{{ lang_url('/enroll', lang) }}">{{ ui.nav_enroll }}</a>
+        <a href="{{ lang_url('/admin', lang) }}">{{ ui.nav_admin }}</a>
         {% if is_admin %}
-        <form class="inline" method="post" action="/logout">
+        <form class="inline" method="post" action="{{ lang_url('/logout', lang) }}">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <button class="link-button" type="submit">Déconnexion</button>
+          <button class="link-button" type="submit">{{ ui.nav_logout }}</button>
         </form>
         {% else %}
-        <a href="/login">Connexion</a>
+        <a href="{{ lang_url('/login', lang) }}">{{ ui.nav_admin }}</a>
         {% endif %}
+        <a href="{{ switch_lang_url }}">{{ ui.nav_language }}</a>
       </nav>
     </header>
     <main class="content">
@@ -36,4 +37,3 @@
   </div>
 </body>
 </html>
-

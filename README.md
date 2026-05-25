@@ -16,6 +16,8 @@ SimpleWebPKI is a self-hosted web application for generating and distributing cl
 - Pushover notifications on every certificate generation
 - Admin dashboard for inventory, logical revocation, and CSV export
 - CSRF protection and simple rate limiting on `/enroll`
+- QR code on the download page for sharing the short-lived `.p12` link
+- Built-in French/English UI switcher in the header
 
 ## Requirements
 
@@ -35,11 +37,10 @@ Important variables:
 - `DATABASE_URL`: SQLite database URL, default `sqlite:////data/certportal.db`
 - `CA_CERT_PATH`: read-only CA certificate path
 - `CA_KEY_PATH`: read-only CA private key path
-- `CERT_MAX_DAYS`: maximum allowed duration
+- `CERT_MAX_DAYS`: maximum allowed duration, default `3650`
 - `DOWNLOAD_TTL_SECONDS`: lifetime of download links
 - `PUSHOVER_ENABLED`: enable or disable Pushover
-- `INVITE_TOKEN`: optional invite token for `/enroll`
-- `CERTPORTAL_DEV_CA=true`: auto-generate a development CA only if CA files are missing
+- `GENERATE_SELF_SIGNED_CA=true`: auto-generate a development CA only if CA files are missing
 
 ## Create a Test CA with OpenSSL
 
@@ -54,7 +55,7 @@ openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
 chmod 600 pki/ca.key
 ```
 
-Then start the app with `CERTPORTAL_DEV_CA=false`.
+Then start the app with `GENERATE_SELF_SIGNED_CA=false`.
 
 ## Mount an OPNsense CA Export
 
@@ -77,18 +78,6 @@ docker compose up -d --build
 ```
 
 The application listens on `127.0.0.1:8080` by default in this compose setup. If you use SWAG/nginx as a reverse proxy, keep access limited to LAN/VPN only.
-
-## GitHub Actions CI/CD
-
-This repository includes a GitHub Actions workflow that:
-
-- builds the image on every pull request
-- publishes the image to GitHub Container Registry (`ghcr.io`) on `main`
-- also publishes on `v*` tags
-
-The published image looks like:
-
-`ghcr.io/<owner>/<repo>:latest`
 
 ## Reverse Proxy with SWAG/nginx
 
@@ -125,15 +114,14 @@ Cloudflare expects the public CA certificate to validate client mTLS certificate
 
 ## Usage
 
-1. Open `/login` and sign in with `admin`.
-2. Open `/enroll`.
-3. Fill in:
+1. Open `/enroll`.
+2. Fill in:
    - `username`
    - `device_name`
    - `device_type`
-   - `certificate_duration_days`
-   - `p12_password`
-4. Download the `.p12` first for iPhone.
+   - `certificate_duration_days` (`90`, `180`, `365`, `1825`, `3650`)
+   - `p12_password` (optional)
+3. Download the `.p12` first for iPhone.
 
 The Common Name is generated automatically as:
 
@@ -145,12 +133,14 @@ The Common Name is generated automatically as:
 2. Open the file.
 3. Go to `Settings > Profile Downloaded`.
 4. Install the profile.
-5. Enter the `.p12` password.
+5. Enter the `.p12` password if you set one.
 6. Test access to the protected domain.
 
 Important warning for users:
 
 > The `.p12` file contains a private key. Do not share it. The link expires quickly.
+
+For the smoothest iPhone experience, keep the `.p12` format. Leaving the password empty gives the simplest install flow, while setting one adds transport protection.
 
 ## Revocation
 
@@ -161,7 +151,7 @@ The `Mark revoked` button marks the certificate as revoked in SQLite for interna
 To auto-generate a development CA when the CA is missing:
 
 ```bash
-export CERTPORTAL_DEV_CA=true
+export GENERATE_SELF_SIGNED_CA=true
 docker compose up -d --build
 ```
 
@@ -170,4 +160,3 @@ This option is intended only for demo/dev use.
 ## Health
 
 The `/healthz` endpoint returns a simple status JSON.
-

@@ -1,41 +1,48 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="card">
-  <p class="eyebrow">Téléchargements prêts</p>
+  <p class="eyebrow">{{ ui.download_eyebrow }}</p>
   <h1>{{ common_name }}</h1>
-  <p class="lead">Le certificat a été généré. Les liens expirent à {{ expires_at_human }}.</p>
+  <p class="lead">{{ ui.download_lead.format(expires=expires_at_human) }}</p>
   <div class="warning">
-    Le fichier <strong>.p12</strong> contient une clé privée. Ne le partagez pas. Le lien expire rapidement.
+    {{ ui.download_warning }}
+  </div>
+  <div class="qr-card">
+    <h2>{{ ui.download_qr_title }}</h2>
+    <p>{{ ui.download_qr_desc }}</p>
+    <div class="qr-frame">
+      <div class="qr-svg">{{ p12_qr_svg | safe }}</div>
+    </div>
+    <p class="mono qr-url">{{ p12_download_url }}</p>
   </div>
   <div class="download-grid">
-    <a class="button primary" href="/download/{{ download_token }}/p12">Télécharger .p12</a>
-    <a class="button secondary" href="/download/{{ download_token }}/crt">Télécharger .crt</a>
-    <a class="button secondary" href="/download/{{ download_token }}/key">Télécharger .key</a>
-    <a class="button secondary" href="/download/{{ download_token }}/pem">Télécharger .pem</a>
-    <a class="button secondary" href="/download/{{ download_token }}/ca">Télécharger CA .crt</a>
+    <a class="button primary" href="/download/{{ download_token }}/p12">{{ ui.download_qr_button }}</a>
+    <a class="button secondary" href="/download/{{ download_token }}/crt">{{ ui.download_crt }}</a>
+    <a class="button secondary" href="/download/{{ download_token }}/key">{{ ui.download_key }}</a>
+    <a class="button secondary" href="/download/{{ download_token }}/pem">{{ ui.download_pem }}</a>
+    <a class="button secondary" href="/download/{{ download_token }}/ca">{{ ui.download_ca }}</a>
   </div>
 </section>
 
 <section class="grid">
   <article class="card">
-    <h2>Installation iPhone</h2>
+    <h2>{{ ui.download_iphone_title }}</h2>
     <ol class="steps">
-      <li>Téléchargez le fichier .p12.</li>
-      <li>Ouvrez le fichier depuis Safari ou Fichiers.</li>
-      <li>Allez dans Réglages &gt; Profil téléchargé.</li>
-      <li>Installez le profil.</li>
-      <li>Entrez le mot de passe du .p12.</li>
-      <li>Testez ensuite le domaine protégé.</li>
+      <li>{{ ui.download_step1 }}</li>
+      <li>{{ ui.download_step2 }}</li>
+      <li>{{ ui.download_step3 }}</li>
+      <li>{{ ui.download_step4 }}</li>
+      <li>{{ ui.download_step5 }}</li>
+      <li>{{ ui.download_step6 }}</li>
     </ol>
   </article>
   <article class="card">
-    <h2>Résumé</h2>
+    <h2>{{ ui.download_summary_title }}</h2>
     <dl class="kv">
-      <div><dt>CN</dt><dd>{{ common_name }}</dd></div>
-      <div><dt>Type</dt><dd>{{ device_type }}</dd></div>
-      <div><dt>Expiration des liens</dt><dd>{{ expires_at_human }}</dd></div>
+      <div><dt>{{ ui.download_summary_cn }}</dt><dd>{{ common_name }}</dd></div>
+      <div><dt>{{ ui.download_summary_type }}</dt><dd>{{ device_type }}</dd></div>
+      <div><dt>{{ ui.download_summary_expiration }}</dt><dd>{{ expires_at_human }}</dd></div>
     </dl>
   </article>
 </section>
 {% endblock %}
-

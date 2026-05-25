@@ -227,6 +227,43 @@ select {
   border: 1px solid rgba(245, 158, 11, 0.25);
 }
 
+.qr-card {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid var(--panel-border);
+  background: rgba(255, 255, 255, 0.28);
+}
+
+@media (prefers-color-scheme: dark) {
+  .qr-card {
+    background: rgba(2, 6, 23, 0.22);
+  }
+}
+
+.qr-frame {
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  margin: 14px 0 10px;
+  border-radius: 16px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.qr-svg svg {
+  display: block;
+  width: min(72vw, 260px);
+  height: auto;
+}
+
+.qr-url {
+  margin: 0;
+  word-break: break-all;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
 .flash-stack {
   display: grid;
   gap: 10px;
@@ -386,4 +423,3 @@ select {
     flex-direction: column;
   }
 }
-

@@ -1,21 +1,21 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="card auth-card">
-  <p class="eyebrow">Accès administrateur</p>
-  <h1>Connexion</h1>
-  <form method="post" action="/login" class="stack">
+  <p class="eyebrow">{{ ui.login_eyebrow }}</p>
+  <h1>{{ ui.login_title }}</h1>
+  <p class="lead">{{ ui.login_lead }} <a href="{{ lang_url('/enroll', lang) }}">/enroll</a>.</p>
+  <form method="post" action="{{ lang_url('/login', lang) }}" class="stack">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <input type="hidden" name="next_path" value="{{ next_path }}">
     <label>
-      <span>Nom d’utilisateur</span>
+      <span>{{ ui.login_username }}</span>
       <input type="text" name="username" value="admin" autocomplete="username" inputmode="text" required>
     </label>
     <label>
-      <span>Mot de passe</span>
+      <span>{{ ui.login_password }}</span>
       <input type="password" name="password" autocomplete="current-password" required>
     </label>
-    <button class="button primary" type="submit">Se connecter</button>
+    <button class="button primary" type="submit">{{ ui.login_submit }}</button>
   </form>
 </section>
 {% endblock %}
-

@@ -35,14 +35,12 @@ class Settings:
     database_url: str = os.getenv("DATABASE_URL", "sqlite:////data/certportal.db").strip()
     ca_cert_path: Path = Path(os.getenv("CA_CERT_PATH", "/pki/ca.crt")).expanduser()
     ca_key_path: Path = Path(os.getenv("CA_KEY_PATH", "/pki/ca.key")).expanduser()
-    cert_max_days: int = _env_int("CERT_MAX_DAYS", 365)
+    cert_max_days: int = _env_int("CERT_MAX_DAYS", 3650)
     download_ttl_seconds: int = _env_int("DOWNLOAD_TTL_SECONDS", 600)
     pushover_enabled: bool = _env_bool("PUSHOVER_ENABLED", False)
     pushover_user_key: str = os.getenv("PUSHOVER_USER_KEY", "").strip()
     pushover_api_token: str = os.getenv("PUSHOVER_API_TOKEN", "").strip()
-    dev_ca: bool = _env_bool("CERTPORTAL_DEV_CA", False)
-    invite_token: str = os.getenv("INVITE_TOKEN", "").strip()
-    session_cookie_secure: bool = _env_bool("SESSION_COOKIE_SECURE", False)
+    generate_self_signed_ca: bool = _env_bool("GENERATE_SELF_SIGNED_CA", False)
     data_dir: Path = Path(os.getenv("DATA_DIR", "/data")).expanduser()
     temp_root: Path = Path(os.getenv("CERT_TEMP_ROOT", "/tmp/certportal")).expanduser()
     enroll_rate_limit_max: int = _env_int("ENROLL_RATE_LIMIT_MAX", 5)
@@ -52,7 +50,7 @@ class Settings:
         if not self.secret_key:
             self.secret_key = _default_secret_key()
         if self.cert_max_days < 1:
-            self.cert_max_days = 365
+            self.cert_max_days = 3650
         if self.download_ttl_seconds < 60:
             self.download_ttl_seconds = 600
         self.temp_root.mkdir(parents=True, exist_ok=True)
@@ -69,4 +67,3 @@ class Settings:
 
 def load_settings() -> Settings:
     return Settings()
-

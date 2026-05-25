@@ -20,8 +20,9 @@
     <a class="button secondary" href="/download/{{ download_token }}/crt">{{ ui.download_crt }}</a>
     <a class="button secondary" href="/download/{{ download_token }}/key">{{ ui.download_key }}</a>
     <a class="button secondary" href="/download/{{ download_token }}/pem">{{ ui.download_pem }}</a>
-    <a class="button secondary" href="/download/{{ download_token }}/ca">{{ ui.download_ca }}</a>
+    <a class="button secondary" href="{{ lang_url('/ca.crt', lang) }}">{{ ui.download_ca_public }}</a>
   </div>
+  <p class="hint">{{ ui.download_ca_hint }}</p>
 </section>
 
 <section class="grid">

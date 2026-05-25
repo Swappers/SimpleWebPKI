@@ -91,6 +91,8 @@ I18N = {
         "download_key": "Télécharger .key",
         "download_pem": "Télécharger .pem",
         "download_ca": "Télécharger CA .crt",
+        "download_ca_public": "Télécharger la CA publique",
+        "download_ca_hint": "Installez la CA une seule fois pour que les certificats clients apparaissent comme attendus sur l’iPhone.",
         "download_iphone_title": "Installation iPhone",
         "download_step1": "Téléchargez le fichier .p12.",
         "download_step2": "Ouvrez le fichier depuis Safari ou Fichiers.",
@@ -196,6 +198,8 @@ I18N = {
         "download_key": "Download .key",
         "download_pem": "Download .pem",
         "download_ca": "Download CA .crt",
+        "download_ca_public": "Download public CA",
+        "download_ca_hint": "Install the CA once so client certificates appear trusted as expected on the iPhone.",
         "download_iphone_title": "iPhone setup",
         "download_step1": "Download the .p12 file.",
         "download_step2": "Open the file from Safari or Files.",
@@ -726,6 +730,18 @@ def create_app() -> FastAPI:
             path=str(file_path),
             filename=_download_filename(fmt),
             media_type=_download_media_type(fmt),
+            headers={"Cache-Control": "no-store"},
+        )
+
+    @app.get("/ca.crt")
+    async def download_ca(request: Request):
+        ca_path = request.app.state.pki.ca_cert_path
+        if not ca_path.exists():
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        return FileResponse(
+            path=str(ca_path),
+            filename="ca.crt",
+            media_type=_download_media_type("ca"),
             headers={"Cache-Control": "no-store"},
         )
 

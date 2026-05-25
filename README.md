@@ -17,6 +17,7 @@ SimpleWebPKI is a self-hosted web application for generating and distributing cl
 - Admin dashboard for inventory, logical revocation, and CSV export
 - CSRF protection and simple rate limiting on `/enroll`
 - QR code on the download page for sharing the short-lived `.p12` link
+- Public `ca.crt` download to install the CA root once on iPhone or other clients
 - Built-in French/English UI switcher in the header
 
 ## Requirements
@@ -121,7 +122,8 @@ Cloudflare expects the public CA certificate to validate client mTLS certificate
    - `device_type`
    - `certificate_duration_days` (`90`, `180`, `365`, `1825`, `3650`)
    - `p12_password` (optional)
-3. Download the `.p12` first for iPhone.
+3. Download the public `ca.crt` once if your device does not already trust the CA.
+4. Download the `.p12` for the client identity.
 
 The Common Name is generated automatically as:
 
@@ -130,17 +132,20 @@ The Common Name is generated automatically as:
 ## Install the `.p12` on iPhone
 
 1. Download the `.p12` file from Safari or Files.
-2. Open the file.
-3. Go to `Settings > Profile Downloaded`.
-4. Install the profile.
-5. Enter the `.p12` password if you set one.
-6. Test access to the protected domain.
+2. If needed, download and trust `ca.crt` first.
+3. Open the `.p12` file.
+4. Go to `Settings > Profile Downloaded`.
+5. Install the profile.
+6. Enter the `.p12` password if you set one.
+7. Test access to the protected domain.
 
 Important warning for users:
 
 > The `.p12` file contains a private key. Do not share it. The link expires quickly.
 
 For the smoothest iPhone experience, keep the `.p12` format. Leaving the password empty gives the simplest install flow, while setting one adds transport protection.
+
+The public CA certificate is available directly at `/ca.crt` and can be installed once so the issued client certificates are recognized more naturally on Apple devices.
 
 ## Revocation
 

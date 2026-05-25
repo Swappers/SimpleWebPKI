@@ -1,11 +1,21 @@
 services:
   certportal:
-    build: .
+    image: ghcr.io/swappers/simplewebpki:latest
     container_name: simplewebpki
-    env_file:
-      - .env
     ports:
       - "127.0.0.1:8080:8080"
+    environment:
+      ADMIN_PASSWORD: "change-me"
+      SECRET_KEY: "change-me"
+      DATABASE_URL: "sqlite:////data/certportal.db"
+      CA_CERT_PATH: "/pki/ca.crt"
+      CA_KEY_PATH: "/pki/ca.key"
+      CERT_MAX_DAYS: "3650"
+      DOWNLOAD_TTL_SECONDS: "600"
+      PUSHOVER_ENABLED: "false"
+      PUSHOVER_USER_KEY: ""
+      PUSHOVER_API_TOKEN: ""
+      GENERATE_SELF_SIGNED_CA: "false"
     volumes:
       - ./data:/data
       - ./pki:/pki:ro

@@ -28,7 +28,7 @@ SimpleWebPKI is a self-hosted web application for generating and distributing cl
 
 ## Configuration
 
-Copy `.env.example` to `.env` and fill in the values.
+Set the values directly in the `environment:` block of `docker-compose.yml`. The file ships with `change-me` placeholders for the required secrets.
 
 Important variables:
 
@@ -55,7 +55,7 @@ openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
 chmod 600 pki/ca.key
 ```
 
-Then start the app with `GENERATE_SELF_SIGNED_CA=false`.
+Then start the app with `GENERATE_SELF_SIGNED_CA=false` in `docker-compose.yml`.
 
 ## Mount an OPNsense CA Export
 
@@ -74,10 +74,10 @@ If the CA is missing in production, the application refuses to start.
 ## Start the App
 
 ```bash
-docker compose up -d --build
+docker compose up -d
 ```
 
-The application listens on `127.0.0.1:8080` by default in this compose setup. If you use SWAG/nginx as a reverse proxy, keep access limited to LAN/VPN only.
+The application pulls the image from GitHub Container Registry (`ghcr.io/swappers/simplewebpki:latest`) and listens on `127.0.0.1:8080` by default in this compose setup. If you use SWAG/nginx as a reverse proxy, keep access limited to LAN/VPN only.
 
 ## Reverse Proxy with SWAG/nginx
 
@@ -152,7 +152,7 @@ To auto-generate a development CA when the CA is missing:
 
 ```bash
 export GENERATE_SELF_SIGNED_CA=true
-docker compose up -d --build
+docker compose up -d
 ```
 
 This option is intended only for demo/dev use.

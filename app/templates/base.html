@@ -12,14 +12,14 @@
       <a class="brand" href="{{ lang_url('/', lang) }}">SimpleWebPKI</a>
       <nav class="topnav">
         <a href="{{ lang_url('/enroll', lang) }}">{{ ui.nav_enroll }}</a>
-        <a href="{{ lang_url('/admin', lang) }}">{{ ui.nav_admin }}</a>
         {% if is_admin %}
+        <a href="{{ lang_url('/admin', lang) }}">{{ ui.nav_admin }}</a>
         <form class="inline" method="post" action="{{ lang_url('/logout', lang) }}">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <button class="link-button" type="submit">{{ ui.nav_logout }}</button>
         </form>
         {% else %}
-        <a href="{{ lang_url('/login', lang) }}">{{ ui.nav_admin }}</a>
+        <a href="{{ lang_url('/login', lang) }}">{{ ui.nav_login }}</a>
         {% endif %}
         <a href="{{ switch_lang_url }}">{{ ui.nav_language }}</a>
       </nav>

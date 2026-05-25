@@ -48,6 +48,7 @@ I18N = {
     "fr": {
         "nav_enroll": "Enrôlement",
         "nav_admin": "Administration",
+        "nav_login": "Connexion admin",
         "nav_logout": "Déconnexion",
         "nav_language": "English",
         "index_kicker": "PKI client mTLS self-hosted",
@@ -155,6 +156,7 @@ I18N = {
     "en": {
         "nav_enroll": "Enroll",
         "nav_admin": "Admin",
+        "nav_login": "Admin login",
         "nav_logout": "Logout",
         "nav_language": "Français",
         "index_kicker": "Self-hosted mTLS client PKI",

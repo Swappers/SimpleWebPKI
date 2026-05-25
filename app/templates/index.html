@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero card">
+  <p class="eyebrow">PKI client mTLS self-hosted</p>
+  <h1>SimpleWebPKI</h1>
+  <p class="lead">
+    Générez et distribuez des certificats client mTLS depuis votre LAN ou VPN, avec un flux pensé pour iPhone.
+  </p>
+  <div class="hero-actions">
+    <a class="button primary" href="/enroll">Démarrer l’enrôlement</a>
+    <a class="button secondary" href="/admin">Ouvrir l’administration</a>
+  </div>
+</section>
+
+<section class="grid">
+  <article class="card">
+    <h2>Usage simple</h2>
+    <p>Créez un certificat client, téléchargez les formats utiles, puis installez le .p12 sur iPhone, macOS, Windows ou Android.</p>
+  </article>
+  <article class="card">
+    <h2>Temporaire et propre</h2>
+    <p>Les fichiers sensibles vivent uniquement dans un répertoire temporaire et expirent automatiquement après 10 minutes.</p>
+  </article>
+  <article class="card">
+    <h2>Administration</h2>
+    <p>Surveillez l’inventaire, exportez en CSV et marquez les certificats comme révoqués dans SQLite.</p>
+  </article>
+</section>
+
+{% if not invite_enabled and not is_admin %}
+<section class="card notice">
+  <strong>Accès:</strong> connectez-vous avec le compte admin ou ouvrez la page d’enrôlement depuis un lien d’invitation configuré.
+</section>
+{% endif %}
+{% endblock %}
+

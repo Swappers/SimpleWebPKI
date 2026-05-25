@@ -1,0 +1,6 @@
+data/
+pki/
+__pycache__/
+*.pyc
+.env
+

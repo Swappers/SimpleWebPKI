@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+  <p class="eyebrow">Administration</p>
+  <h1>Inventaire des certificats</h1>
+  <div class="admin-meta">
+    <div class="meta-item"><span>CA chargée</span><strong>{% if ca_cert_path and ca_key_path %}Oui{% else %}Non{% endif %}</strong></div>
+    <div class="meta-item"><span>Chemin CA cert</span><strong>{{ ca_cert_path }}</strong></div>
+    <div class="meta-item"><span>Chemin CA key</span><strong>{{ ca_key_path }}</strong></div>
+    <div class="meta-item"><span>Pushover</span><strong>{% if settings.pushover_configured %}Configuré{% else %}Non configuré{% endif %}</strong></div>
+  </div>
+  <div class="hero-actions">
+    <a class="button secondary" href="/admin/export.csv">Exporter CSV</a>
+  </div>
+</section>
+
+<section class="stack">
+  {% for cert in records %}
+  <article class="card cert-card {% if cert.revoked_at %}revoked{% endif %}">
+    <div class="cert-header">
+      <div>
+        <p class="eyebrow">#{{ cert.id }}</p>
+        <h2>{{ cert.username }} / {{ cert.device_name }}</h2>
+        <p class="mono">{{ cert.common_name }}</p>
+      </div>
+      <div class="status-pill {% if cert.revoked_at %}bad{% elif cert.downloaded_at %}good{% else %}neutral{% endif %}">
+        {% if cert.revoked_at %}Révoqué{% elif cert.downloaded_at %}Téléchargé{% else %}En attente{% endif %}
+      </div>
+    </div>
+    <dl class="kv">
+      <div><dt>Device</dt><dd>{{ cert.device_type }}</dd></div>
+      <div><dt>Serial</dt><dd class="mono">{{ cert.serial_number }}</dd></div>
+      <div><dt>Fingerprint SHA256</dt><dd class="mono">{{ cert.certificate_fingerprint_sha256 }}</dd></div>
+      <div><dt>Émis</dt><dd>{{ cert.issued_at }}</dd></div>
+      <div><dt>Expire</dt><dd>{{ cert.expires_at }}</dd></div>
+      <div><dt>Téléchargé</dt><dd>{{ cert.downloaded_at or 'Non' }}</dd></div>
+      <div><dt>Révoqué</dt><dd>{{ cert.revoked_at or 'Non' }}</dd></div>
+      <div><dt>Source IP</dt><dd>{{ cert.source_ip }}</dd></div>
+      <div><dt>User agent</dt><dd>{{ cert.user_agent }}</dd></div>
+    </dl>
+    {% if not cert.revoked_at %}
+    <form method="post" action="/admin/certs/{{ cert.id }}/revoke" class="inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button class="button danger" type="submit">Mark revoked</button>
+    </form>
+    {% endif %}
+  </article>
+  {% else %}
+  <article class="card">
+    <p>Aucun certificat généré pour le moment.</p>
+  </article>
+  {% endfor %}
+</section>
+{% endblock %}
+

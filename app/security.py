@@ -23,7 +23,7 @@ MESSAGES = {
         "device_type": "Type d'appareil invalide",
         "duration": "Durée non autorisée",
         "duration_limit": "Durée supérieure à la limite autorisée",
-        "password": "Le mot de passe du .p12 doit contenir au moins 12 caractères, ou être laissé vide",
+        "password": "Le mot de passe du .p12 doit contenir au moins 12 caractères s'il est renseigné",
         "admin_forbidden": "Accès refusé",
     },
     "en": {
@@ -32,7 +32,7 @@ MESSAGES = {
         "device_type": "Invalid device type",
         "duration": "Duration not allowed",
         "duration_limit": "Duration exceeds the allowed limit",
-        "password": "The .p12 password must be at least 12 characters, or left blank",
+        "password": "The .p12 password must be at least 12 characters if provided",
         "admin_forbidden": "Access denied",
     },
 }
@@ -107,8 +107,8 @@ def validate_p12_password(password: str, lang: str = "fr") -> str:
     return cleaned
 
 
-def common_name(username: str, device_name: str) -> str:
-    return f"{username}-{device_name}"
+def common_name(username: str, device_name: str, year: int) -> str:
+    return f"{username}-{device_name}-{year}"
 
 
 def get_client_ip(request: Request) -> str:

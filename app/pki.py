@@ -70,7 +70,8 @@ class PKIManager:
         if self.ca_cert_path.exists() and self.ca_key_path.exists():
             return
 
-        logger.warning("GENERATE_SELF_SIGNED_CA activé: génération d'une CA de développement dans %s", dev_ca_dir)
+        ca_name = self.settings.self_signed_ca_name or "SimpleWebPKI CA"
+        logger.warning("GENERATE_SELF_SIGNED_CA activé: génération d'une CA locale dans %s", dev_ca_dir)
         self._run(
             [
                 "openssl",
@@ -82,8 +83,14 @@ class PKIManager:
                 "-days",
                 "3650",
                 "-nodes",
+                "-addext",
+                "basicConstraints=critical,CA:TRUE,pathlen:0",
+                "-addext",
+                "keyUsage=critical,keyCertSign,cRLSign",
+                "-addext",
+                "subjectKeyIdentifier=hash",
                 "-subj",
-                "/CN=SimpleWebPKI Dev CA/O=SimpleWebPKI",
+                f"/CN={ca_name}/O=SimpleWebPKI",
                 "-keyout",
                 str(self.ca_key_path),
                 "-out",
@@ -159,6 +166,8 @@ class PKIManager:
                         "basicConstraints=CA:FALSE",
                         "keyUsage=critical,digitalSignature,keyEncipherment",
                         "extendedKeyUsage=clientAuth",
+                        "subjectKeyIdentifier=hash",
+                        "authorityKeyIdentifier=keyid,issuer",
                         "",
                     ]
                 ),
@@ -196,6 +205,10 @@ class PKIManager:
                 "openssl",
                 "pkcs12",
                 "-export",
+                "-name",
+                f"SimpleWebPKI {common_name}",
+                "-caname",
+                "SimpleWebPKI Root CA",
                 "-inkey",
                 str(client_key),
                 "-in",
@@ -215,6 +228,16 @@ class PKIManager:
             self._run(pkcs12_cmd)
             os.chmod(client_p12, 0o600)
             p12_password_file.unlink(missing_ok=True)
+
+            self._run(
+                [
+                    "openssl",
+                    "verify",
+                    "-CAfile",
+                    str(self.ca_cert_path),
+                    str(client_crt),
+                ]
+            )
 
             meta = self._run(
                 [

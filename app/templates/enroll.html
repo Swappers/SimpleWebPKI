@@ -18,11 +18,11 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <label>
       <span>{{ ui.enroll_username }}</span>
-      <input type="text" name="username" value="{{ defaults.username }}" placeholder="fahd" required maxlength="64" pattern="[A-Za-z0-9_-]+">
+      <input type="text" id="username-field" name="username" value="{{ defaults.username }}" placeholder="fahd" required maxlength="64" pattern="[a-z0-9_-]+" autocapitalize="none" autocomplete="off" spellcheck="false">
     </label>
     <label>
       <span>{{ ui.enroll_device_name }}</span>
-      <input type="text" name="device_name" value="{{ defaults.device_name }}" placeholder="iphone15" required maxlength="64" pattern="[A-Za-z0-9_-]+">
+      <input type="text" id="device-name-field" name="device_name" value="{{ defaults.device_name }}" placeholder="iphone" required maxlength="64" pattern="[a-z0-9_-]+" autocapitalize="none" autocomplete="off" spellcheck="false">
     </label>
     <label>
       <span>{{ ui.enroll_device_type }}</span>
@@ -42,7 +42,8 @@
     </label>
     <label>
       <span>{{ ui.enroll_p12_password }}</span>
-      <input type="password" name="p12_password" autocomplete="new-password" minlength="12" placeholder="{{ ui.enroll_p12_placeholder }}">
+      <input type="text" id="p12-password-display" value="{{ defaults.username }}" readonly aria-readonly="true" placeholder="{{ ui.enroll_p12_placeholder }}" tabindex="-1">
+      <small class="hint">{{ ui.enroll_p12_hint }}</small>
     </label>
     <button class="button primary" type="submit">{{ ui.enroll_submit }}</button>
   </form>

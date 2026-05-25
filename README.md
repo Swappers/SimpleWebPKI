@@ -42,6 +42,7 @@ Important variables:
 - `DOWNLOAD_TTL_SECONDS`: lifetime of download links
 - `PUSHOVER_ENABLED`: enable or disable Pushover
 - `GENERATE_SELF_SIGNED_CA=true`: auto-generate a development CA only if CA files are missing
+- `SELF_SIGNED_CA_NAME`: common name used when the local self-signed CA is auto-generated
 
 ## Create a Test CA with OpenSSL
 
@@ -117,17 +118,19 @@ Cloudflare expects the public CA certificate to validate client mTLS certificate
 
 1. Open `/enroll`.
 2. Fill in:
-   - `username`
-   - `device_name`
+   - `username` in lowercase
+   - `device_name` prefilled from the `User-Agent` and editable if needed
    - `device_type`
    - `certificate_duration_days` (`90`, `180`, `365`, `1825`, `3650`)
-   - `p12_password` (optional)
+   - the `.p12` password is derived from `username` and shown on the download page
 3. Download the public `ca.crt` once if your device does not already trust the CA.
 4. Download the `.p12` for the client identity.
 
+The `.p12` password is always the lowercase `username`, and SimpleWebPKI shows it clearly on the download page.
+
 The Common Name is generated automatically as:
 
-`username-device_name`
+`username-device_name-year`
 
 ## Install the `.p12` on iPhone
 
@@ -143,9 +146,11 @@ Important warning for users:
 
 > The `.p12` file contains a private key. Do not share it. The link expires quickly.
 
-For the smoothest iPhone experience, keep the `.p12` format. Leaving the password empty gives the simplest install flow, while setting one adds transport protection.
+For the smoothest iPhone experience, keep the `.p12` format. The password matches the username so it stays simple and predictable.
 
 The public CA certificate is available directly at `/ca.crt` and can be installed once so the issued client certificates are recognized more naturally on Apple devices.
+
+The `.p12` is exported with a friendly PKCS#12 name so it is easier to identify during import.
 
 ## Revocation
 
@@ -161,6 +166,8 @@ docker compose up -d
 ```
 
 This option is intended only for demo/dev use.
+
+You can customize the generated CA name with `SELF_SIGNED_CA_NAME` in `docker-compose.yml`.
 
 ## Health
 

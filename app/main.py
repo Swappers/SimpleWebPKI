@@ -31,7 +31,6 @@ from .security import (
     validate_device_type,
     validate_duration,
     validate_identifier,
-    validate_p12_password,
 )
 
 
@@ -79,12 +78,15 @@ I18N = {
         "enroll_device_name": "Nom de l’appareil",
         "enroll_device_type": "Type d’appareil",
         "enroll_duration": "Durée du certificat",
-        "enroll_p12_password": "Mot de passe du .p12 (optionnel)",
-        "enroll_p12_placeholder": "Laisser vide pour ne pas en définir",
+        "enroll_p12_password": "Mot de passe du .p12",
+        "enroll_p12_placeholder": "Identique au nom d’utilisateur",
+        "enroll_p12_hint": "Le mot de passe suit automatiquement le nom d’utilisateur en minuscules et ne peut pas être modifié.",
         "enroll_submit": "Générer le certificat",
         "download_eyebrow": "Téléchargements prêts",
         "download_lead": "Le certificat a été généré. Les liens expirent à {expires}.",
         "download_warning": "Le fichier .p12 contient une clé privée. Ne le partagez pas. Le lien expire rapidement.",
+        "download_password_title": "Mot de passe du .p12",
+        "download_password_desc": "Utilisez le nom d’utilisateur en minuscules comme mot de passe lors de l’installation sur iPhone.",
         "download_qr_title": "Partager via QR code",
         "download_qr_desc": "Scannez ce QR code pour ouvrir directement le lien de téléchargement du .p12 sur un autre appareil.",
         "download_qr_button": "Télécharger .p12",
@@ -99,7 +101,7 @@ I18N = {
         "download_step2": "Ouvrez le fichier depuis Safari ou Fichiers.",
         "download_step3": "Allez dans Réglages > Profil téléchargé.",
         "download_step4": "Installez le profil.",
-        "download_step5": "Entrez le mot de passe du .p12 si vous en avez défini un.",
+        "download_step5": "Entrez le nom d’utilisateur en minuscules comme mot de passe du .p12.",
         "download_step6": "Testez ensuite le domaine protégé.",
         "download_summary_title": "Résumé",
         "download_summary_cn": "CN",
@@ -187,12 +189,15 @@ I18N = {
         "enroll_device_name": "Device name",
         "enroll_device_type": "Device type",
         "enroll_duration": "Certificate duration",
-        "enroll_p12_password": "P12 password (optional)",
-        "enroll_p12_placeholder": "Leave blank for no password",
+        "enroll_p12_password": "P12 password",
+        "enroll_p12_placeholder": "Same as username",
+        "enroll_p12_hint": "The password automatically follows the username in lowercase and cannot be changed.",
         "enroll_submit": "Generate certificate",
         "download_eyebrow": "Downloads ready",
         "download_lead": "The certificate has been generated. Links expire at {expires}.",
         "download_warning": "The .p12 file contains a private key. Do not share it. The link expires quickly.",
+        "download_password_title": "P12 password",
+        "download_password_desc": "Use the lowercase username as the password during installation on iPhone.",
         "download_qr_title": "Share via QR code",
         "download_qr_desc": "Scan this QR code to open the .p12 download link directly on another device.",
         "download_qr_button": "Download .p12",
@@ -207,7 +212,7 @@ I18N = {
         "download_step2": "Open the file from Safari or Files.",
         "download_step3": "Go to Settings > Profile Downloaded.",
         "download_step4": "Install the profile.",
-        "download_step5": "Enter the .p12 password if you set one.",
+        "download_step5": "Enter the lowercase username as the .p12 password.",
         "download_step6": "Then test the protected domain.",
         "download_summary_title": "Summary",
         "download_summary_cn": "CN",
@@ -299,6 +304,23 @@ def _download_media_type(fmt: str) -> str:
         "pem": "application/x-pem-file",
         "ca": "application/x-x509-ca-cert",
     }[fmt]
+
+
+def _guess_device_name(user_agent: str | None) -> str:
+    ua = (user_agent or "").lower()
+    if "iphone" in ua:
+        return "iphone"
+    if "ipad" in ua:
+        return "ipad"
+    if "android" in ua:
+        return "android"
+    if "windows" in ua:
+        return "windows"
+    if "macintosh" in ua or "mac os x" in ua:
+        return "mac"
+    if "linux" in ua:
+        return "linux"
+    return "device"
 
 
 def get_lang(request: Request) -> str:
@@ -541,6 +563,7 @@ def create_app() -> FastAPI:
 
     @app.get("/enroll", response_class=HTMLResponse)
     async def enroll_page(request: Request):
+        user_agent = request.headers.get("user-agent")
         return TEMPLATES.TemplateResponse(
             "enroll.html",
             {
@@ -556,7 +579,7 @@ def create_app() -> FastAPI:
                 ],
                 "defaults": {
                     "username": "",
-                    "device_name": "",
+                    "device_name": _guess_device_name(user_agent),
                     "device_type": "iphone",
                     "certificate_duration_days": "365",
                 },
@@ -571,7 +594,6 @@ def create_app() -> FastAPI:
         device_name: str = Form(...),
         device_type: str = Form(...),
         certificate_duration_days: str = Form(...),
-        p12_password: str = Form(...),
         csrf_token: str = Form(...),
     ):
         lang = get_lang(request)
@@ -588,12 +610,12 @@ def create_app() -> FastAPI:
 
         errors: list[str] = []
         try:
-            username_clean = validate_identifier(username, "username", lang)
-            device_name_clean = validate_identifier(device_name, "device_name", lang)
+            username_clean = validate_identifier(username, "username", lang).lower()
+            device_name_clean = validate_identifier(device_name, "device_name", lang).lower()
             device_type_clean = validate_device_type(device_type, lang)
             duration_days = validate_duration(certificate_duration_days, request.app.state.settings.cert_max_days, lang)
-            password_clean = validate_p12_password(p12_password, lang)
         except HTTPException as exc:
+            guessed_device_name = _guess_device_name(request.headers.get("user-agent"))
             errors.append(str(exc.detail))
             return TEMPLATES.TemplateResponse(
                 "enroll.html",
@@ -610,8 +632,8 @@ def create_app() -> FastAPI:
                         ("other", "Other" if lang == "en" else "Autre"),
                     ],
                     "defaults": {
-                        "username": username,
-                        "device_name": device_name,
+                        "username": username.strip().lower(),
+                        "device_name": (device_name.strip().lower() or guessed_device_name),
                         "device_type": device_type,
                         "certificate_duration_days": certificate_duration_days or "365",
                     },
@@ -619,7 +641,8 @@ def create_app() -> FastAPI:
                 status_code=400,
             )
 
-        cn = common_name(username_clean, device_name_clean)
+        issued_year = utcnow().year
+        cn = common_name(username_clean, device_name_clean, issued_year)
         download_token = secrets.token_urlsafe(32)
         try:
             artifacts = await asyncio.to_thread(
@@ -630,7 +653,7 @@ def create_app() -> FastAPI:
                 common_name=cn,
                 device_type=device_type_clean,
                 duration_days=duration_days,
-                p12_password=password_clean,
+                p12_password=username_clean,
             )
         except PKIError as exc:
             logger.exception("Échec de génération du certificat pour %s", cn)
@@ -695,6 +718,8 @@ def create_app() -> FastAPI:
                 "download_token": download_token,
                 "p12_download_url": p12_download_url,
                 "p12_qr_svg": p12_qr_svg,
+                "p12_password": username_clean,
+                "issued_year": issued_year,
                 "download_ttl_seconds": request.app.state.settings.download_ttl_seconds,
                 "expires_at_human": _dt_format(download_expires_at),
                 "common_name": cn,

@@ -270,6 +270,27 @@ select {
   font-size: 0.92rem;
 }
 
+.inline-callout {
+  margin-top: 16px;
+}
+
+.password-box {
+  display: inline-block;
+  min-width: min(100%, 320px);
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.08);
+  word-break: break-word;
+  letter-spacing: 0.04em;
+}
+
+@media (prefers-color-scheme: dark) {
+  .password-box {
+    background: rgba(148, 163, 184, 0.12);
+  }
+}
+
 .flash-stack {
   display: grid;
   gap: 10px;

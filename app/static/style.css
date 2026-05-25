@@ -264,6 +264,12 @@ select {
   color: var(--muted);
 }
 
+.hint {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
 .flash-stack {
   display: grid;
   gap: 10px;

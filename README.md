@@ -43,6 +43,7 @@ Important variables:
 - `PUSHOVER_ENABLED`: enable or disable Pushover
 - `GENERATE_SELF_SIGNED_CA=true`: auto-generate a development CA only if CA files are missing
 - `SELF_SIGNED_CA_NAME`: common name used when the local self-signed CA is auto-generated
+- `SELF_SIGNED_CA_ORG`: organization name used when the local self-signed CA is auto-generated
 
 ## Create a Test CA with OpenSSL
 
@@ -167,7 +168,7 @@ docker compose up -d
 
 This option is intended only for demo/dev use.
 
-You can customize the generated CA name with `SELF_SIGNED_CA_NAME` in `docker-compose.yml`.
+You can customize the generated CA name with `SELF_SIGNED_CA_NAME` and its organization with `SELF_SIGNED_CA_ORG` in `docker-compose.yml`.
 
 ## Health
 

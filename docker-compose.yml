@@ -17,6 +17,7 @@ services:
       PUSHOVER_API_TOKEN: ""
       GENERATE_SELF_SIGNED_CA: "false"
       SELF_SIGNED_CA_NAME: "SimpleWebPKI CA"
+      SELF_SIGNED_CA_ORG: "SimpleWebPKI"
     volumes:
       - ./data:/data
       - ./pki:/pki:ro

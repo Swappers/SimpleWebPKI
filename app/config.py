@@ -42,6 +42,7 @@ class Settings:
     pushover_api_token: str = os.getenv("PUSHOVER_API_TOKEN", "").strip()
     generate_self_signed_ca: bool = _env_bool("GENERATE_SELF_SIGNED_CA", False)
     self_signed_ca_name: str = os.getenv("SELF_SIGNED_CA_NAME", "SimpleWebPKI CA").strip()
+    self_signed_ca_org: str = os.getenv("SELF_SIGNED_CA_ORG", "SimpleWebPKI").strip()
     data_dir: Path = Path(os.getenv("DATA_DIR", "/data")).expanduser()
     temp_root: Path = Path(os.getenv("CERT_TEMP_ROOT", "/tmp/certportal")).expanduser()
     enroll_rate_limit_max: int = _env_int("ENROLL_RATE_LIMIT_MAX", 5)

@@ -71,6 +71,7 @@ class PKIManager:
             return
 
         ca_name = self.settings.self_signed_ca_name or "SimpleWebPKI CA"
+        ca_org = self.settings.self_signed_ca_org or "SimpleWebPKI"
         logger.warning("GENERATE_SELF_SIGNED_CA activé: génération d'une CA locale dans %s", dev_ca_dir)
         self._run(
             [
@@ -90,7 +91,7 @@ class PKIManager:
                 "-addext",
                 "subjectKeyIdentifier=hash",
                 "-subj",
-                f"/CN={ca_name}/O=SimpleWebPKI",
+                f"/CN={ca_name}/O={ca_org}",
                 "-keyout",
                 str(self.ca_key_path),
                 "-out",

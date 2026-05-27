@@ -2,7 +2,7 @@
 <html lang="{{ lang }}">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>{{ app_name }}</title>
   <link rel="stylesheet" href="/static/style.css">
   <script src="/static/app.js" defer></script>
@@ -12,17 +12,17 @@
     <header class="topbar">
       <a class="brand" href="{{ lang_url('/', lang) }}">SimpleWebPKI</a>
       <nav class="topnav">
-        <a href="{{ lang_url('/enroll', lang) }}">{{ ui.nav_enroll }}</a>
+        <a class="nav-item" href="{{ lang_url('/enroll', lang) }}">{{ ui.nav_enroll }}</a>
         {% if is_admin %}
-        <a href="{{ lang_url('/admin', lang) }}">{{ ui.nav_admin }}</a>
+        <a class="nav-item" href="{{ lang_url('/admin', lang) }}">{{ ui.nav_admin }}</a>
         <form class="inline" method="post" action="{{ lang_url('/logout', lang) }}">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <button class="link-button" type="submit">{{ ui.nav_logout }}</button>
+          <button class="link-button nav-item" type="submit">{{ ui.nav_logout }}</button>
         </form>
         {% else %}
-        <a href="{{ lang_url('/login', lang) }}">{{ ui.nav_login }}</a>
+        <a class="nav-item" href="{{ lang_url('/login', lang) }}">{{ ui.nav_login }}</a>
         {% endif %}
-        <a href="{{ switch_lang_url }}">{{ ui.nav_language }}</a>
+        <a class="nav-item nav-accent" href="{{ switch_lang_url }}">{{ ui.nav_language }}</a>
       </nav>
     </header>
     <main class="content">
